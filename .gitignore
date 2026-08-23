@@ -1,0 +1,36 @@
+# ---------- 构建产物 ----------
+target/
+*.class
+
+# 本地打包的 Maven 发行版（10MB+，不入库）
+.tools/
+
+# ---------- IDE ----------
+.idea/
+*.iml
+.vscode/
+*.ipr
+*.iws
+.settings/
+.classpath
+.project
+
+# ---------- 操作系统 ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- 日志 ----------
+*.log
+logs/
+
+# ---------- 运行时数据（插件数据库等，绝不入库） ----------
+*.db
+*.db-journal
+plugins/
+
+# ---------- 其他 ----------
+dependency-reduced-pom.xml
+build/
+out/
+*.zip

@@ -1,0 +1,14 @@
+create-cost: 100000
+icon-change-cost: 1000
+title-cost: 10000
+title-duration-days: 30
+signin-points: 5
+member-limit-base: 5
+member-limit-max: 20
+member-slot-cost: 50
+currency-name: '龙门币'
+guild-name-max-length: 16
+title-max-length: 16
+notice-max-length: 64
+invite-expire-seconds: 60
+timezone: 'Asia/Shanghai'

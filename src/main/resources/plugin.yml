@@ -1,0 +1,28 @@
+name: GuGuild
+version: '1.0.0'
+main: com.guguild.GuGuildPlugin
+api-version: '26.1'
+description: 箱子GUI公会插件，支持活跃值排行、签到、Vault龙门币与PlayerTitle公会称号
+author: GuGuild
+depend:
+  - Vault
+softdepend:
+  - EzEconomy
+loadbefore:
+  - PlayerTitle
+libraries:
+  - org.xerial:sqlite-jdbc:3.53.2.1
+
+commands:
+  guild:
+    description: 公会主命令
+    aliases: [gh]
+    permission: guild.use
+
+permissions:
+  guild.use:
+    description: 使用公会基础功能
+    default: true
+  guild.admin:
+    description: 公会管理命令
+    default: op
