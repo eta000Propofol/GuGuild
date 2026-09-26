@@ -98,6 +98,15 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                 });
             case "seticon":
                 return requirePlayer(sender, player -> service.setIcon(player));
+            case "sethome":
+                return requirePlayer(sender, player -> service.setHome(player));
+            case "tp":
+            case "visit":
+                if (args.length < 2) {
+                    msg(sender, "&c用法: /guild tp <公会>");
+                    return true;
+                }
+                return requirePlayer(sender, player -> service.teleportHome(player, joinArgs(args, 1)));
             case "setjointype":
                 if (args.length < 2) {
                     msg(sender, "&c用法: /guild setjointype <invite|free>");
@@ -268,6 +277,8 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
         msg(sender, "&f/guild invite <玩家> &7邀请玩家");
         msg(sender, "&f/guild accept <公会> &7接受邀请");
         msg(sender, "&f/guild seticon &7用手持物品设置图标");
+        msg(sender, "&f/guild sethome &7设置公会主城(会长, 2000龙门币)");
+        msg(sender, "&f/guild tp <公会> &7传送到公会主城参观");
         msg(sender, "&f/guild setjointype <invite|free> &7切换加入方式");
         msg(sender, "&f/guild title buy <文字> &7购买公会称号");
         msg(sender, "&f/guild admin reload &7重载配置(管理员)");
@@ -281,7 +292,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> result = new ArrayList<>();
         if (args.length == 1) {
-            String[] subs = {"help", "top", "list", "create", "home", "info", "members", "invite", "accept", "decline", "join", "leave", "disband", "seticon", "setjointype", "setvice", "kick", "transfer", "sign", "notice", "title", "admin"};
+            String[] subs = {"help", "top", "list", "create", "home", "info", "members", "invite", "accept", "decline", "join", "leave", "disband", "seticon", "sethome", "tp", "visit", "setjointype", "setvice", "kick", "transfer", "sign", "notice", "title", "admin"};
             for (String s : subs) {
                 if (s.startsWith(args[0].toLowerCase())) {
                     result.add(s);
@@ -313,4 +324,5 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
         return result;
     }
 }
+
 

@@ -1,8 +1,8 @@
 name: GuGuild
-version: '1.0.0'
+version: '1.1.0'
 main: com.guguild.GuGuildPlugin
 api-version: '26.1'
-description: 箱子GUI公会插件，支持活跃值排行、签到、Vault龙门币与PlayerTitle公会称号
+description: 箱子GUI公会插件，支持活跃值排行、签到、Vault龙门币、公会主城与PlayerTitle公会称号
 author: GuGuild
 depend:
   - Vault
@@ -26,3 +26,4 @@ permissions:
   guild.admin:
     description: 公会管理命令
     default: op
+

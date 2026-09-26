@@ -1,5 +1,6 @@
 create-cost: 100000
 icon-change-cost: 1000
+home-cost: 2000
 title-cost: 10000
 title-duration-days: 30
 signin-points: 5
@@ -12,3 +13,4 @@ title-max-length: 16
 notice-max-length: 64
 invite-expire-seconds: 60
 timezone: 'Asia/Shanghai'
+

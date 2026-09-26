@@ -119,6 +119,14 @@ public class GuiListener implements Listener {
             case "open_members":
                 GuiFactory.openMemberList(player, holder.guildId, 0);
                 break;
+            case "tp_home":
+                player.closeInventory();
+                service.teleportHome(player);
+                break;
+            case "set_home":
+                player.closeInventory();
+                service.setHome(player);
+                break;
             case "invite_player":
                 player.closeInventory();
                 pending.put(player.getUniqueId(), PendingInputService.Action.INVITE_PLAYER);
@@ -172,6 +180,10 @@ public class GuiListener implements Listener {
             case "toggle_join":
                 service.toggleJoinType(player);
                 GuiFactory.openSettings(player, holder.guildId);
+                break;
+            case "set_home":
+                player.closeInventory();
+                service.setHome(player);
                 break;
             case "upgrade_limit":
                 GuiFactory.openConfirm(player, holder.guildId, ConfirmAction.UPGRADE_LIMIT, null, null);

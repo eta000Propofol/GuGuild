@@ -116,6 +116,7 @@ public final class GuiFactory {
                     ? "&a有效"
                     : "&7无";
             lore.add(ColorUtil.colorize("&7公会称号: " + titleStatus));
+            lore.add(ColorUtil.colorize("&7主城: " + (guild.hasHome() ? "&a已设置" : "&7未设置")));
             lore.add(ColorUtil.colorize(JoinType.FREE.equals(guild.joinType) ? "&e点击加入" : "&c仅邀请"));
             meta.setLore(lore);
             item.setItemMeta(meta);
@@ -184,12 +185,18 @@ public final class GuiFactory {
         }
 
         inv.setItem(45, button(Material.ARROW, "&a返回公会列表", "back_list"));
+        if (guild.hasHome()) {
+            inv.setItem(46, button(Material.END_CRYSTAL, "&a传送至主城", "tp_home", "&7前往公会主城参观"));
+        }
         inv.setItem(47, button(Material.EXPERIENCE_BOTTLE, "&a每日签到", "sign"));
         inv.setItem(49, info(Material.PAPER, "&f公会主页"));
         if (Role.LEADER.equals(member.role) || Role.VICE.equals(member.role)) {
             inv.setItem(51, button(Material.ANVIL, "&a公会设置", "open_settings"));
         } else {
             inv.setItem(51, button(Material.BARRIER, "&c退出公会", "leave_guild", "&7退出后需要重新加入"));
+        }
+        if (Role.LEADER.equals(member.role)) {
+            inv.setItem(52, button(Material.BEACON, "&a设置公会主城", "set_home", "&7消耗 " + plugin.getConfigManager().getHomeCost() + " " + plugin.getConfigManager().getCurrencyName(), "&7将主城设为当前所在位置"));
         }
         inv.setItem(53, button(Material.PLAYER_HEAD, "&a成员列表", "open_members"));
         player.openInventory(inv);
@@ -283,6 +290,9 @@ public final class GuiFactory {
             inv.setItem(16, button(Material.PLAYER_HEAD, "&a任免副会长", "set_vice", "&7使用 /guild setvice <玩家>"));
         }
         if (Role.LEADER.equals(member.role) || Role.VICE.equals(member.role)) {
+        if (Role.LEADER.equals(member.role)) {
+            inv.setItem(20, button(Material.BEACON, "&a设置公会主城", "set_home", "&7消耗 " + plugin.getConfigManager().getHomeCost() + " " + plugin.getConfigManager().getCurrencyName(), "&7将主城设为当前所在位置"));
+        }
             inv.setItem(22, button(Material.BARRIER, "&c踢出成员", "kick_hint", "&7使用 /guild kick <玩家>"));
         }
         if (Role.LEADER.equals(member.role)) {
@@ -392,4 +402,5 @@ public final class GuiFactory {
         return member.lastSigninDate.equals(java.time.LocalDate.now(zone).toString());
     }
 }
+
 

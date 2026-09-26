@@ -37,6 +37,10 @@ public class GuildConfig {
         return getInt("icon-change-cost", 1000);
     }
 
+    public int getHomeCost() {
+        return getInt("home-cost", 2000);
+    }
+
     public int getTitleCost() {
         return getInt("title-cost", 10000);
     }
@@ -100,4 +104,5 @@ public class GuildConfig {
         return zoneId;
     }
 }
+
 

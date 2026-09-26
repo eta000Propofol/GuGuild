@@ -74,8 +74,59 @@ public class Database {
             for (String sql : schema) {
                 s.executeUpdate(sql);
             }
+            migrateGuildHomeColumns(c);
         } catch (SQLException e) {
             plugin.getLogger().severe("数据库初始化失败: " + e.getMessage());
+        }
+    }
+
+    private void migrateGuildHomeColumns(Connection c) {
+        List<String> columns = new ArrayList<>();
+        try (Statement s = c.createStatement(); ResultSet rs = s.executeQuery("PRAGMA table_info(guilds)")) {
+            while (rs.next()) {
+                columns.add(rs.getString("name"));
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().severe("读取 guilds 表结构失败: " + e.getMessage());
+            return;
+        }
+        try (Statement s = c.createStatement()) {
+            if (!columns.contains("home_world")) {
+                s.executeUpdate("ALTER TABLE guilds ADD COLUMN home_world TEXT");
+            }
+            if (!columns.contains("home_x")) {
+                s.executeUpdate("ALTER TABLE guilds ADD COLUMN home_x REAL");
+            }
+            if (!columns.contains("home_y")) {
+                s.executeUpdate("ALTER TABLE guilds ADD COLUMN home_y REAL");
+            }
+            if (!columns.contains("home_z")) {
+                s.executeUpdate("ALTER TABLE guilds ADD COLUMN home_z REAL");
+            }
+            if (!columns.contains("home_yaw")) {
+                s.executeUpdate("ALTER TABLE guilds ADD COLUMN home_yaw REAL");
+            }
+            if (!columns.contains("home_pitch")) {
+                s.executeUpdate("ALTER TABLE guilds ADD COLUMN home_pitch REAL");
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().severe("迁移 guilds 主城字段失败: " + e.getMessage());
+        }
+    }
+
+    public void updateGuildHome(int guildId, String world, double x, double y, double z, float yaw, float pitch) {
+        String sql = "UPDATE guilds SET home_world=?, home_x=?, home_y=?, home_z=?, home_yaw=?, home_pitch=? WHERE id=?";
+        try (Connection c = open(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, world);
+            ps.setDouble(2, x);
+            ps.setDouble(3, y);
+            ps.setDouble(4, z);
+            ps.setFloat(5, yaw);
+            ps.setFloat(6, pitch);
+            ps.setInt(7, guildId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            plugin.getLogger().severe("updateGuildHome失败: " + e.getMessage());
         }
     }
 
@@ -483,6 +534,12 @@ public class Database {
         long titleExpireAt = rs.getLong("title_expire_at");
         g.titleExpireAt = rs.wasNull() ? null : titleExpireAt;
         g.createdAt = rs.getLong("created_at");
+        g.homeWorld = rs.getString("home_world");
+        g.homeX = rs.getDouble("home_x");
+        g.homeY = rs.getDouble("home_y");
+        g.homeZ = rs.getDouble("home_z");
+        g.homeYaw = rs.getFloat("home_yaw");
+        g.homePitch = rs.getFloat("home_pitch");
         return g;
     }
 
@@ -510,3 +567,5 @@ public class Database {
         return invite;
     }
 }
+
+

@@ -11,7 +11,9 @@ import com.guguild.model.Role;
 import com.guguild.util.ColorUtil;
 import com.guguild.util.ItemUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -507,6 +509,81 @@ public class GuildService {
         msg(player, "&a公会图标已更新。");
     }
 
+    public Guild findGuildByName(String nameInput) {
+        return database.findGuildByName(ColorUtil.normalizeName(nameInput));
+    }
+
+    public void setHome(Player player) {
+        GuildMember member = getMember(player.getUniqueId());
+        if (member == null) {
+            msg(player, "&c你还没有公会。");
+            return;
+        }
+        if (!Role.LEADER.equals(member.role)) {
+            msg(player, "&c只有会长可以设置公会主城。");
+            return;
+        }
+        Guild guild = database.findGuildById(member.guildId);
+        if (guild == null) {
+            return;
+        }
+        double cost = config.getHomeCost();
+        if (!economy.isReady()) {
+            msg(player, "&c经济系统暂不可用，请稍后再试。");
+            return;
+        }
+        if (!economy.has(player, cost)) {
+            msg(player, "&c余额不足，设置主城需要 " + config.getCurrencyName() + " x" + cost + "。");
+            return;
+        }
+        if (!economy.withdraw(player, cost)) {
+            msg(player, "&c扣款失败，请稍后再试。");
+            return;
+        }
+        Location loc = player.getLocation();
+        database.updateGuildHome(guild.id,
+                loc.getWorld() == null ? "" : loc.getWorld().getName(),
+                loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
+        msg(player, "&a公会主城已设置成功，消耗 " + config.getCurrencyName() + " x" + cost + "。");
+        notifyGuild(guild, "&e公会主城已更新，使用 &f/guild tp " + guild.name + " &e前往参观。");
+    }
+
+    public void teleportHome(Player player) {
+        Guild guild = getGuild(player.getUniqueId());
+        if (guild == null) {
+            msg(player, "&c你还没有公会。");
+            return;
+        }
+        teleportToHome(player, guild);
+    }
+
+    public void teleportHome(Player player, String nameInput) {
+        Guild guild = findGuildByName(nameInput);
+        if (guild == null) {
+            msg(player, "&c公会不存在。");
+            return;
+        }
+        teleportToHome(player, guild);
+    }
+
+    private void teleportToHome(Player player, Guild guild) {
+        if (!guild.hasHome()) {
+            msg(player, "&c该公会尚未设置主城。");
+            return;
+        }
+        World world = Bukkit.getWorld(guild.homeWorld);
+        if (world == null) {
+            msg(player, "&c该公会主城所在的世界不存在或未加载。");
+            return;
+        }
+        Location loc = new Location(world, guild.homeX, guild.homeY, guild.homeZ, guild.homeYaw, guild.homePitch);
+        if (player.teleport(loc)) {
+            msg(player, "&a你已传送到公会 " + guild.displayName + " &a的主城。");
+        } else {
+            msg(player, "&c传送失败，请稍后再试。");
+        }
+    }
+
     public void sign(Player player) {
         GuildMember member = getMember(player.getUniqueId());
         if (member == null) {
@@ -723,5 +800,6 @@ public class GuildService {
         sender.sendMessage(ColorUtil.colorize("&8[&6公会&8] &f" + text));
     }
 }
+
 
 

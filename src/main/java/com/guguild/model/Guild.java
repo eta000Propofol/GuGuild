@@ -15,4 +15,16 @@ public class Guild {
     public Long titleExpireAt;
     public long createdAt;
     public int memberCount;
+
+    // 公会主城
+    public String homeWorld;
+    public double homeX;
+    public double homeY;
+    public double homeZ;
+    public float homeYaw;
+    public float homePitch;
+
+    public boolean hasHome() {
+        return homeWorld != null && !homeWorld.isEmpty();
+    }
 }
