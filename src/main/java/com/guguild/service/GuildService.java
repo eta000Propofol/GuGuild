@@ -678,14 +678,13 @@ public class GuildService {
             }
         }
 
-        int remainingDays = Math.max(1, (int) Math.ceil((expireAt - now) / 86400000.0));
         for (GuildMember m : database.listMembers(guild.id)) {
             UUID uuid = UUID.fromString(m.uuid);
             Player p = Bukkit.getPlayer(uuid);
             if (p != null) {
-                title.grantAndEquip(p, uuid, m.name, titleId, remainingDays);
+                title.grantAndEquip(p, uuid, m.name, titleId);
             } else {
-                title.grant(uuid, m.name, titleId, remainingDays);
+                title.grant(uuid, m.name, titleId);
             }
         }
         database.updateGuildTitle(guild.id, titleId, titleText, expireAt);
@@ -697,12 +696,11 @@ public class GuildService {
         if (guild == null || guild.titleId == null || guild.titleExpireAt == null || guild.titleExpireAt <= System.currentTimeMillis()) {
             return;
         }
-        int remainingDays = remainingDays(guild);
         UUID uuid = player.getUniqueId();
         if (title.hasTitle(uuid, guild.titleId)) {
             title.equip(player, guild.titleId);
         } else {
-            title.grantAndEquip(player, uuid, player.getName(), guild.titleId, remainingDays);
+            title.grantAndEquip(player, uuid, player.getName(), guild.titleId);
         }
     }
 
@@ -718,6 +716,33 @@ public class GuildService {
                 }
                 database.clearGuildTitle(guild.id);
                 plugin.getLogger().info("公会 " + guild.name + " 的称号已到期并移除。");
+            }
+        }
+    }
+
+    /**
+     * 自愈：公会称号有效期内，如果在线成员的称号被 PlayerTitle 或其他插件摘掉，
+     * 这里会重新补发并佩戴（玩家自己佩戴了别的称号时不打扰）。
+     */
+    public void refreshActiveTitles() {
+        if (!title.isAvailable()) {
+            return;
+        }
+        long now = System.currentTimeMillis();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            Guild guild = getGuild(player.getUniqueId());
+            if (guild == null || guild.titleId == null || guild.titleExpireAt == null || guild.titleExpireAt <= now) {
+                continue;
+            }
+            int shownTitleId = title.getShownTitleId(player.getUniqueId());
+            if (shownTitleId > 0 && shownTitleId != guild.titleId) {
+                continue;
+            }
+            UUID uuid = player.getUniqueId();
+            if (title.hasTitle(uuid, guild.titleId)) {
+                title.equip(player, guild.titleId);
+            } else {
+                title.grantAndEquip(player, uuid, player.getName(), guild.titleId);
             }
         }
     }
@@ -752,12 +777,11 @@ public class GuildService {
         member.joinedAt = System.currentTimeMillis();
         database.insertMember(member);
         if (guild.titleId != null && guild.titleExpireAt != null && guild.titleExpireAt > System.currentTimeMillis()) {
-            int days = remainingDays(guild);
             Player p = Bukkit.getPlayer(uuid);
             if (p != null) {
-                title.grantAndEquip(p, uuid, name, guild.titleId, days);
+                title.grantAndEquip(p, uuid, name, guild.titleId);
             } else {
-                title.grant(uuid, name, guild.titleId, days);
+                title.grant(uuid, name, guild.titleId);
             }
         }
     }
@@ -767,11 +791,6 @@ public class GuildService {
             return;
         }
         title.remove(uuid, guild.titleId);
-    }
-
-    private int remainingDays(Guild guild) {
-        long now = System.currentTimeMillis();
-        return Math.max(1, (int) Math.ceil((guild.titleExpireAt - now) / 86400000.0));
     }
 
     private GuildMember findMemberByName(int guildId, String name) {
@@ -800,6 +819,8 @@ public class GuildService {
         sender.sendMessage(ColorUtil.colorize("&8[&6公会&8] &f" + text));
     }
 }
+
+
 
 
 

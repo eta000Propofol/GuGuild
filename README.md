@@ -19,10 +19,10 @@ Minecraft 26.1.2 Paper 公会插件。
 mvnw.cmd package
 ```
 
-产物：`target/GuGuild-1.1.0.jar`
+产物：`target/GuGuild-1.1.1.jar`
 
 ## 安装
-1. 将 `GuGuild-1.1.0.jar` 放入 Paper 服务端 `plugins/`。
+1. 将 `GuGuild-1.1.1.jar` 放入 Paper 服务端 `plugins/`。
 2. 确保已安装 Vault 与经济插件，并可选安装 PlayerTitle。
 3. 启动服务端，插件会在 `plugins/GuGuild/config.yml` 生成配置。
 4. 玩家使用 `/guild` 或 `/gh` 打开公会界面。
@@ -40,4 +40,5 @@ mvnw.cmd package
 - `/guild notice <文本>`
 - `/guild title` / `/guild title buy <文字>`
 - `/guild admin reload|delete|giveactive`
+
 

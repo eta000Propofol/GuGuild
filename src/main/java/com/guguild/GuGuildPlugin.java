@@ -64,6 +64,7 @@ public final class GuGuildPlugin extends JavaPlugin {
             }
             database.deleteExpiredInvites(System.currentTimeMillis());
             guildService.checkExpiredTitles();
+            guildService.refreshActiveTitles();
         }, 20L, 1200L);
 
         // 延迟到所有插件启用完成后再检测 PlayerTitle，避免因加载顺序导致的误判。
@@ -115,3 +116,4 @@ public final class GuGuildPlugin extends JavaPlugin {
         return pendingInputService;
     }
 }
+

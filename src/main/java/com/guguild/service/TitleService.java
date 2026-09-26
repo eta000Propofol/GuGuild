@@ -13,6 +13,7 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class TitleService {
@@ -87,12 +88,18 @@ public class TitleService {
         }
     }
 
-    public void grant(UUID uuid, String playerName, int titleId, int days) {
+    /**
+     * 授予公会称号。
+     * PlayerTitle 里按“永久”写入（其内部 days 传 0 等于 36500 天），
+     * 真实的一个月期限由 GuGuild 自己的 title_expire_at 管理。
+     * 这样 PlayerTitle 每 60 秒的到期检查不会把公会称号摘掉。
+     */
+    public void grant(UUID uuid, String playerName, int titleId) {
         if (!isAvailable() || titleId <= 0) {
             return;
         }
         try {
-            PlayerTitleApi.setPlayerTitle(playerName, uuid, titleId, days);
+            PlayerTitleApi.setPlayerTitle(playerName, uuid, titleId, 0);
         } catch (Throwable t) {
             plugin.getLogger().warning("授予 PlayerTitle 称号失败: " + t.getMessage());
         }
@@ -118,8 +125,8 @@ public class TitleService {
         }
     }
 
-    public void grantAndEquip(Player player, UUID uuid, String playerName, int titleId, int days) {
-        grant(uuid, playerName, titleId, days);
+    public void grantAndEquip(Player player, UUID uuid, String playerName, int titleId) {
+        grant(uuid, playerName, titleId);
         equip(player, titleId);
     }
 
@@ -134,6 +141,37 @@ public class TitleService {
         }
         // 移除后刷新在线玩家的称号缓存，否则聊天前缀会继续显示已删除的称号
         refreshCache(Bukkit.getPlayer(uuid));
+    }
+
+    /**
+     * 读取玩家当前“正在展示”的称号 id（直接读 PlayerTitle 的内存缓存）。
+     * 返回 -1 表示缓存里没有正在展示的称号。
+     */
+    public int getShownTitleId(UUID uuid) {
+        if (!isAvailable() || uuid == null) {
+            return -1;
+        }
+        try {
+            Map<?, ?> showMap = showCacheMap();
+            if (showMap == null) {
+                return -1;
+            }
+            Object cached = showMap.get(uuid);
+            if (cached == null) {
+                return -1;
+            }
+            Object id = cached.getClass().getMethod("getTitleId").invoke(cached);
+            return id instanceof Integer ? (Integer) id : -1;
+        } catch (Throwable t) {
+            plugin.getLogger().warning("读取 PlayerTitle 称号缓存失败: " + t.getMessage());
+            return -1;
+        }
+    }
+
+    private Map<?, ?> showCacheMap() throws Throwable {
+        Class<?> clazz = Class.forName("cn.handyplus.title.constants.TitleConstants");
+        Object value = clazz.getField("TITLE_PLAYER_SHOW_MAP").get(null);
+        return value instanceof Map<?, ?> map ? map : null;
     }
 
     /**
@@ -152,4 +190,3 @@ public class TitleService {
         }
     }
 }
-
